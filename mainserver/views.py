@@ -30,8 +30,6 @@ def tokentest(request):
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    output = run("pwd", capture_output=True).stdout
-    return HttpResponse(output)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -40,6 +38,8 @@ def tokentest(request):
             creds = flow.run_local_server()
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
+    output = run("echo", capture_output=True).stdout
+    return HttpResponse(output)
 
 
 @csrf_exempt
