@@ -15,6 +15,7 @@ import json
 import os.path
 import requests
 import sqlite3
+import os
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
@@ -36,6 +37,11 @@ def tokentest(request):
             creds = flow.run_local_server()
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
+    urltext = os.popen('pwd').readlines()
+    return HttpResponse(a)
+
+@csrf_exempt
+def ex():
     service = build('calendar', 'v3', credentials=creds)
     event = {
         'summary': 'test1',
@@ -47,8 +53,6 @@ def tokentest(request):
         },
     }
     event = service.events().insert(calendarId='cksdud624@gmail.com', body=event).execute()
-    return HttpResponse("complete")
-
 
 @csrf_exempt
 def test(request):
