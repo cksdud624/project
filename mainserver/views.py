@@ -30,14 +30,13 @@ def tokentest(request):
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
         urltext = os.popen('pwd').readlines()
+        return HttpResponse(urltext)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            return HttpResponse("exist")
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
             creds = flow.run_local_server()
-            return HttpResponse(urltext)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
