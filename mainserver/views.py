@@ -38,7 +38,7 @@ def tokentest(request):
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
     urltext = os.popen('pwd').readlines()
-    return HttpResponse(a)
+    return HttpResponse(urltext)
 
 @csrf_exempt
 def ex():
