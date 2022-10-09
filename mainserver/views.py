@@ -8,6 +8,7 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
+from multiprocessing import Process
 from collections import OrderedDict
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -26,22 +27,30 @@ scoped_credentials = credentials.with_scopes(SCOPES)
 
 
 @csrf_exempt
-def tokentest(request):
+def responseunity(request):
+    jobs = []
+    p1 = Process(target=tokentest())
+    p2 = Process(target=getterminal())
+    p1.start()
+    p2.start()
+    return HttpResponse(p2.output)
+
+@csrf_exempt
+def tokentest():
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-            output = run("echo", capture_output=True).stdout
-            return HttpResponse(output)
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
             creds = flow.run_local_server()
-            output = run("echo", capture_output=True).stdout
-            return HttpResponse(output)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
+@csrf_exempt
+def getterminal():
+    output = run("echo", capture_output=True).stdout
 
 
 @csrf_exempt
