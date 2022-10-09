@@ -33,13 +33,15 @@ def tokentest(request):
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
+            output = run("echo", capture_output=True).stdout
+            return HttpResponse(output)
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
             creds = flow.run_local_server()
+            output = run("echo", capture_output=True).stdout
+            return HttpResponse(output)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
-    output = run("echo", capture_output=True).stdout
-    return HttpResponse(output)
 
 
 @csrf_exempt
