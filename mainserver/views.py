@@ -16,6 +16,7 @@ import os.path
 import requests
 import sqlite3
 import os
+from subprocess import run
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
@@ -26,12 +27,11 @@ scoped_credentials = credentials.with_scopes(SCOPES)
 
 @csrf_exempt
 def tokentest(request):
-    return HttpResponse("1")
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        urltext = os.popen('pwd').readlines()
-        return HttpResponse(urltext)
+        output = run("pwd", capture_output=True).stdout
+        return HttpResponse(output)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
