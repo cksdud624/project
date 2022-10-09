@@ -37,9 +37,9 @@ def tokentest(request):
             return HttpResponse(output)
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            creds = flow.run_local_server()
             output = run("echo", capture_output=True).stdout
             return HttpResponse(output)
-            creds = flow.run_local_server()
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
