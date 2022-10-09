@@ -26,6 +26,7 @@ scoped_credentials = credentials.with_scopes(SCOPES)
 
 @csrf_exempt
 def tokentest(request):
+    return HttpResponse("1")
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
