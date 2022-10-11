@@ -26,14 +26,6 @@ credentials = service_account.Credentials.from_service_account_file('keycode.jso
 scoped_credentials = credentials.with_scopes(SCOPES)
 
 
-@csrf_exempt
-def responseunity(request):
-    jobs = []
-    p1 = Process(target=tokentest())
-    p2 = Process(target=getterminal())
-    p1.start()
-    p2.start()
-    return HttpResponse(p2.output)
 
 @csrf_exempt
 def tokentest():
@@ -48,10 +40,6 @@ def tokentest():
             creds = flow.run_local_server()
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
-@csrf_exempt
-def getterminal():
-    output = run("echo", capture_output=True).stdout
-
 
 @csrf_exempt
 def ex():
