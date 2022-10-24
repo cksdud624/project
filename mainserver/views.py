@@ -1,15 +1,8 @@
-import creds as creds
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import scheduletable, usertable
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
 import json
-import os.path
 import sqlite3
-import os
 
 
 
