@@ -1,60 +1,52 @@
-from django.shortcuts import render
+import creds as creds
 from django.http import HttpResponse
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import scheduletable, usertable
-from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
-from multiprocessing import Process
-from collections import OrderedDict
-import google.oauth2.credentials
-import google_auth_oauthlib.flow
 import json
 import os.path
-import requests
 import sqlite3
 import os
-from subprocess import run
-
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
-
-service_account_email = "djangotest@djangoproject-362411.iam.gserviceaccount.com"
-credentials = service_account.Credentials.from_service_account_file('keycode.json')
-scoped_credentials = credentials.with_scopes(SCOPES)
 
 
 
+updatefield = []
 @csrf_exempt
-def tokentest(request):
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server()
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-    return HttpResponse("ok")
+def test2(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode('utf-8'))
+        authcheck = usertable.objects.filter(userID=data['todatalist'][0]['userid'],
+                                             groupID=data['todatalist'][0]['groupID'],
+                                             caltype=data['todatalist'][0]['caltype'])
+        queryset = authcheck.values_list()
+        authquery = queryset[0][5]
+        if data['todatalist'][0]['commandtype'] == "exportcalendar":
+            if authquery == "2" or authquery == "3":
+                for i in range(0, len(data['todatalist'])):
+                    schedulesearch = scheduletable.objects.filter(caltype=data['todatalist'][i]['caltype'],
+                                                              groupID=data['todatalist'][i]['groupID'],
+                                                              year=data['todatalist'][i]['year'],
+                                                              month=data['todatalist'][i]['month'],
+                                                              day=data['todatalist'][i]['day'],
+                                                              hour=data['todatalist'][i]['hour'],
+                                                              minute=data['todatalist'][i]['minute'],
+                                                              content=data['todatalist'][i]['content'],)
+                    if schedulesearch.count() == 0:
+                        scheduleinsert = scheduletable(userID=data['todatalist'][i]['userid'], caltype=data['todatalist'][i]['caltype'],
+                                                       groupID=data['todatalist'][i]['groupID'],
+                                                       year=data['todatalist'][i]['year'],
+                                                       month=data['todatalist'][i]['month'], day=data['todatalist'][i]['day'],
+                                                       hour=data['todatalist'][i]['hour'], minute=data['todatalist'][i]['minute'],
+                                                       content=data['todatalist'][i]['content'])
+                        scheduleinsert.save()
+                return HttpResponse("export complete")
+            else:
+                return HttpResponse("Authrity error")
 
-@csrf_exempt
-def ex():
-    service = build('calendar', 'v3', credentials=creds)
-    event = {
-        'summary': 'test1',
-        'start': {
-            'dateTime': '2022-09-27T09:00:00+09:00',
-        },
-        'end': {
-            'dateTime': '2022-09-27T10:00:00+09:00',
-        },
-    }
-    event = service.events().insert(calendarId='cksdud624@gmail.com', body=event).execute()
+
 
 @csrf_exempt
 def test(request):
@@ -203,5 +195,70 @@ def test(request):
                         })
                     jsonparse = json.dumps({'items': jsonfile})
                     return HttpResponse(jsonparse)
+        elif data['commandtype'] == "deleteschedule":
+            userauthcheck = usertable.objects.filter(groupID=data['groupID'], userID=data['userid'])
+            scheduledelete = scheduletable.objects.get(userID=data['userid'], caltype=data['caltype'], groupID=data['groupID'],
+                                           year=data['year'],
+                                           month=data['month'], day=data['day'],
+                                           hour=data['hour'], minute=data['minute'],
+                                           content=data['content'])
+            queryset = userauthcheck.values_list()
+            authquery = queryset[0][5]
+            if authquery == "2" or authquery == "3":
+                scheduledelete.delete()
+                return HttpResponse("delete complete")
+            else:
+                return HttpResponse("Authority error")
+        elif data['commandtype'] == "updateschedule":
+            userauthcheck = usertable.objects.filter(groupID=data['groupID'], userID=data['userid'])
+            queryset = userauthcheck.values_list()
+            authquery = queryset[0][5]
+            if authquery == "2" or authquery == "3":
+                updatefield.append(data['hour'])
+                updatefield.append(data['minute'])
+                updatefield.append(data['content'])
+                return HttpResponse("update ready")
+            else:
+                return HttpResponse("Authority error")
+        elif data['commandtype'] == "updateschedule2":
+            currentdatacheck = scheduletable.objects.filter(userID=data['userid'], caltype=data['caltype'],
+                                                    groupID=data['groupID'],
+                                                    year=data['year'], month=data['month'], day=data['day'],
+                                                    hour=updatefield[0], minute=updatefield[1], content=updatefield[2])
+            if currentdatacheck.count() == 1:
+                currentdata = scheduletable.objects.get(userID=data['userid'], caltype=data['caltype'],
+                                                        groupID=data['groupID'],
+                                                        year=data['year'], month=data['month'], day=data['day'],
+                                                        hour=updatefield[0], minute=updatefield[1],
+                                                        content=updatefield[2])
+                currentdata.hour = data['hour']
+                currentdata.minute = data['minute']
+                currentdata.content = data['content']
+                currentdata.save()
+                updatefield.clear()
+                return HttpResponse("update complete")
+            updatefield.clear()
+            return HttpResponse("no schedule")
+        elif data['commandtype'] == "importcalendar":
+            userauthcheck = usertable.objects.filter(groupID=data['groupID'], userID=data['userid'])
+            calendardata = scheduletable.objects.filter(groupID=data['groupID'], caltype=data['caltype'])
+            queryset = userauthcheck.values_list()
+            calendarqueryset = calendardata.values_list()
+            jsonfile = []
+            authquery = queryset[0][5]
+            if authquery == "2" or authquery == "3":
+                for i in range(calendardata.count()):
+                    jsonfile.append({
+                        "year": calendarqueryset[i][4],
+                        "month": calendarqueryset[i][5],
+                        "day": calendarqueryset[i][6],
+                        "hour": calendarqueryset[i][7],
+                        "minute": calendarqueryset[i][8],
+                        "content": calendarqueryset[i][9],
+                    })
+                jsonparse = json.dumps({'todatalist': jsonfile})
+                return HttpResponse(jsonparse)
+            else:
+                return HttpResponse("Authority error")
         else:
-            return HttpResponse("test")
+            return HttpResponse(data[0]['commandtype'])
