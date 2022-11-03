@@ -93,7 +93,7 @@ def test(request):
             queryset = checkgroupid.values_list()
             if useridcheck.count() >= 1:
                 if passwordcheck.count() >= 1:
-                    for i in range(checkgroupid):
+                    for i in len(queryset):
                         checkauth = usertable.objects.filter(userID=data['userid'], caltype='Group',
                                                              groupID=queryset[i],
                                                              authrank="3")
