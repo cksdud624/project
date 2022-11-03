@@ -141,7 +141,7 @@ def test(request):
             grouppasswordcheck = usertable.objects.filter(groupID=data['groupID'], caltype="Group",
                                                           grouppassword=data['password'])
             #삭제된 캘린더의 일정 삭제
-            groupscheduledelete = scheduletable.objects.filter(groupId=data['groupID'], caltype="Group")
+            groupscheduledelete = scheduletable.objects.filter(groupID=data['groupID'], caltype="Group")
             if groupidcheck.count() == 0:
                 return HttpResponse("GroupID not exists")
             else:
