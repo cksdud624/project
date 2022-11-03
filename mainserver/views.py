@@ -92,6 +92,12 @@ def test(request):
                 if passwordcheck.count() >= 1:
                     useridcheck.delete()
                     deletealldate.delete()
+                    # 남아있는 그룹 캘린더 일정 교체
+                    connectdb = sqlite3.connect('db.sqlite3')
+                    conn = connectdb.cursor()
+                    conn.execute('UPDATE mainserver_usertable SET userID = 0 WHERE caltype = :group AND '
+                                 'groupID = :groupID AND userID = :userID',
+                                 {"group": 'Group', "groupID": data['groupID'], "userID": data['userID']})
                     return HttpResponse("ID deleted")
                 else:
                     return HttpResponse("Password error")
