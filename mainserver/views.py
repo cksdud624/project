@@ -90,7 +90,7 @@ def test(request):
             deletealldate = scheduletable.objects.filter(userID=data['userid'], caltype="Public")
             if useridcheck.count() >= 1:
                 if passwordcheck.count() >= 1:
-                    # 남아있는 그룹 캘린더 일정 교체
+                    #남아있는 그룹 캘린더 일정 교체
                     connectdb = sqlite3.connect('db.sqlite3')
                     conn = connectdb.cursor()
                     conn.execute('UPDATE mainserver_usertable SET userID = 0 WHERE caltype = :group AND '
