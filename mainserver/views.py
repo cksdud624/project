@@ -94,7 +94,7 @@ def test(request):
                     connectdb = sqlite3.connect('db.sqlite3')
                     conn = connectdb.cursor()
                     conn.execute('UPDATE mainserver_usertable SET userID = 0 WHERE caltype = :group AND'
-                                 ' userID = :userID', {"group": 'Group', "userID": data['userID']})
+                                 ' userID = :userID', {"group": 'Group', "userID": data['userid']})
                     useridcheck.delete()
                     deletealldate.delete()
                     return HttpResponse("ID deleted")
