@@ -93,7 +93,7 @@ def test(request):
                     #남아있는 그룹 캘린더 일정 교체
                     connectdb = sqlite3.connect('db.sqlite3')
                     conn = connectdb.cursor()
-                    conn.execute('UPDATE mainserver_usertable SET userID = 0 WHERE caltype = :group AND'
+                    conn.execute('UPDATE mainserver_scheduletable SET userID = 0 WHERE caltype = :group AND'
                                  ' userID = :userID', {"group": 'Group', "userID": data['userid']})
                     useridcheck.delete()
                     deletealldate.delete()
