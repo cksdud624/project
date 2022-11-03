@@ -95,7 +95,7 @@ def test(request):
                 if passwordcheck.count() >= 1:
                     for i in range(0, len(queryset)):
                         checkauth = usertable.objects.filter(userID=data['userid'], caltype="Group",
-                                                             groupID=queryset[i],
+                                                             groupID=queryset[i][4],
                                                              authrank="3")
                         if checkauth.count() >= 1:
                             return HttpResponse("delete groupID first")
