@@ -95,6 +95,7 @@ def test(request):
                     conn = connectdb.cursor()
                     conn.execute('UPDATE mainserver_scheduletable SET userID = 0 WHERE caltype = :group AND'
                                  ' userID = :userID', {"group": 'Group', "userID": data['userid']})
+                    connectdb.commit()
                     useridcheck.delete()
                     deletealldate.delete()
                     return HttpResponse("ID deleted")
