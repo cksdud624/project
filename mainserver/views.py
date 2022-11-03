@@ -88,8 +88,17 @@ def test(request):
             passwordcheck = usertable.objects.filter(userID=data['userid'], password=data['password'], caltype="Public")
             #사용자의 퍼블릭 캘린더 일정 삭제
             deletealldate = scheduletable.objects.filter(userID=data['userid'], caltype="Public")
+            #사용자의 권한 유일성 검사
+            checkgroupid = usertable.objects.filter(userID=data['userid'], caltype='Group')
+            queryset = checkgroupid.values_list()
             if useridcheck.count() >= 1:
                 if passwordcheck.count() >= 1:
+                    for i in range(checkgroupid):
+                        checkauth = usertable.objects.filter(userID=data['userid'], caltype='Group',
+                                                             groupID=queryset[i],
+                                                             authrank="3")
+                        if checkauth.count() >= 1:
+                            return HttpResponse("delete groupID first")
                     #남아있는 그룹 캘린더 일정 교체
                     connectdb = sqlite3.connect('db.sqlite3')
                     conn = connectdb.cursor()
