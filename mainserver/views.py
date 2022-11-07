@@ -243,7 +243,7 @@ def test(request):
         #일정 삭제
         elif data['commandtype'] == "deleteschedule":
             #사용자 권한 조회
-            userauthcheck = usertable.objects.filter(groupID=data['groupID'], userID=data['userid'])
+            userauthcheck = usertable.objects.filter(groupID=data['groupID'], userID=data['userid'], caltype=data['caltype'])
             #삭제할 일정 조회
             scheduledelete = scheduletable.objects.get(userID=data['userid'], caltype=data['caltype'], groupID=data['groupID'],
                                            year=data['year'],
